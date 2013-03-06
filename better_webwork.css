@@ -1,0 +1,49 @@
+.bw_box {
+    position: absolute;
+    top: 82px;
+    right: 8px;
+    width: 250px;
+    padding: 10px;
+    background: #FFF;
+    border: 1px solid #222;
+    border-top: 0px;
+}
+
+.bw_box_title {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.bw_due {
+    margin-top: 5px;
+}
+
+#bw_due_date {
+    font-weight: bold;
+}
+
+.error {
+    color: #FF0000;
+}
+
+.bw_great {
+    background: #3BFF5F;
+}
+
+.bw_okay {
+    background: yellow;
+}
+
+.bw_poor {
+    background: #FF0000;
+}
+
+.bw_average td {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-weight: bold;
+}
+
+.bw_average td:nth-child(2) {
+    text-align: center;
+}

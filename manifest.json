@@ -1,0 +1,17 @@
+{
+    "name": "Better WeBWorK",
+    "version": "1.0",
+    "manifest_version": 2,
+    "description": "Makes WeBWorK suck less.",
+
+    "content_scripts": [{
+        "css": ["better_webwork.css"],
+        "js": [
+            "lib/jquery.min.js", 
+            "lib/moment.min.js",
+            "better_webwork.js"
+        ],
+        "matches": ["*://*/webwork/*", "*://*/webwork2/*"]
+    }],
+    "web_accessible_resources": ["box.html"]
+}
