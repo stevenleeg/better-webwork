@@ -1,22 +1,5 @@
 // Taken from http://stackoverflow.com/a/3000784/29291
 var Util = (function() {
-    // Let's get a database
-    var request = window.indexedDB.open("better_webwork", 1);
-    var result;
-
-    request.onerror = function(e) {
-        alert("Better WebWorK cannot function without a database!");
-    }
-
-    request.onsuccess = function(e) {
-        db = request.result;
-    }
-
-    // Set up the database
-    request.onupgradeneeded = function(e) {
-
-    }
-
     function trim(str) {
         return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
     }
@@ -67,7 +50,7 @@ var Webwork = (function() {
         var now = new Date();
         var is = (date < now) ? "was" : "is";
 
-        var date_display = $("<div class=\"bw_due\">This webwork " + is + " due <span id=\"bw_due_date\">" + moment(date).fromNow() + "</span>.</div>");
+        var date_display = $("<div id=\"bw_due\" class=\"bw_due\">This webwork " + is + " due <span id=\"bw_due_date\">" + moment(date).fromNow() + "</span>.</div>");
         date_container.after(date_display).text("");
 
         $("#bw_due_date").on("mouseover", function() {
@@ -93,6 +76,7 @@ var Webwork = (function() {
         var score = 0;
         var total = 0;
         var problems = 0;
+        var blank = 0;
         $("table.problem_set_table tr:nth-child(n+2)").each(function() {
             var perc = parseInt($(this).children("td:nth-child(5)").text().replace("%", ""));
             var worth = parseInt($(this).children("td:nth-child(4)").text());
@@ -100,6 +84,8 @@ var Webwork = (function() {
             score += perc * worth;
             total += 100 * worth;
             problems++;
+            if(perc == 0)
+                blank++;
         });
 
         var average = parseInt(score / total * 100);
@@ -113,6 +99,17 @@ var Webwork = (function() {
             td.addClass("bw_okay");
         else
             td.addClass("bw_poor");
+
+        /*
+         * Work scheduler
+         */
+        // Count how many days we have until the due date
+        var now = new Date();
+        var diff = date.getTime() - now.getTime();
+        var days = Math.round(diff / (1000 * 60 * 60 * 24));
+        var per_day = Math.ceil(blank / days);
+
+        $("#bw_due").append("<p>Complete <b>" + per_day + " problems</b> per day to finish on time.</p>");
     }
 
     function loadBetterBox() {
