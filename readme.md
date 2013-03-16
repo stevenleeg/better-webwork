@@ -6,8 +6,8 @@ Better WeBWorK is still under heavy development, so this list is far from comple
 
  * Provides an overall score on set list
  * Color codes question scores on set list
- * Humanizes the due date (*This webwork is due in 3 days*)
- * Helps you schedule your work (*Complete 7 problems per day to finish on time*)
+ * Humanizes the due date ( *This webwork is due in 3 days* )
+ * Helps you schedule your work ( *Complete 7 problems per day to finish on time* )
 
 Here's an early screenshot of the set list (taken 2013-03-16):
 [![Screenshot](http://i.imgur.com/Q3hqCSAl.jpg)](http://i.imgur.com/Q3hqCSA.jpg)
