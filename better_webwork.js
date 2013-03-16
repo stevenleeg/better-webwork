@@ -13,11 +13,26 @@ var Webwork = (function() {
     var MONTHS = ["January", "Februrary", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var set = undefined;
     var problem = undefined;
+    var _due_date;
 
-    function parseQuestionList() {
-        /*
-         * Score highlighting
-         */
+    function getDueDate() {
+        // Try to get the cached date
+        if(_due_date != undefined)
+            return _due_date;
+
+        var date_container = $("#info-panel-right b");
+        var date_re = /([0-9]{2})\/([0-9]{2})\/([0-9]{4}) at ([0-9]{2})\:([0-9]{2})(am|pm) ([A-Z]{3})/;
+        var date_container = $("#info-panel-right b").text();
+        var results = date_re.exec(date_container);
+        for(var i = 1; i <=5; i++) {
+            results[i] = parseInt(results[i]);
+        }
+        results[4] = (results[6] == "pm") ? results[4] + 12 : results[4];
+        _due_date = new Date(results[3], results[1] - 1, results[2], results[4], results[5]);
+        return _due_date;
+    }
+
+    function highlightScore() {
         $("table.problem_set_table tr td:nth-child(5)").each(function() {
             var re = /([0-9]*)\%/
             var text = $(this).text();
@@ -31,22 +46,11 @@ var Webwork = (function() {
             else
                 $(this).addClass("bw_great");
         });
-            
-        /*
-         * Relative due date
-         */
-        var date_re = /([0-9]{2})\/([0-9]{2})\/([0-9]{4}) at ([0-9]{2})\:([0-9]{2})(am|pm) ([A-Z]{3})/;
+    }
+
+    function relativeDueDate() {
         var date_container = $("#info-panel-right b");
-        var date_text = date_container.text();
-        var results = date_re.exec(date_text);
-        for(var i = 1; i <=5; i++) {
-            results[i] = parseInt(results[i]);
-        }
-
-        // Convert hours to 24hr
-        results[4] = (results[6] == "pm") ? results[4] + 12 : results[4];
-
-        var date = new Date(results[3], results[1] - 1, results[2], results[4], results[5]);
+        var date = getDueDate();
         var now = new Date();
         var is = (date < now) ? "was" : "is";
 
@@ -69,14 +73,12 @@ var Webwork = (function() {
         if(date < now) {
             $("#bw_due_date").addClass("error");
         }
+    }
 
-        /*
-         * Total score
-         */
+    function totalScore() {
         var score = 0;
         var total = 0;
         var problems = 0;
-        var blank = 0;
         $("table.problem_set_table tr:nth-child(n+2)").each(function() {
             var perc = parseInt($(this).children("td:nth-child(5)").text().replace("%", ""));
             var worth = parseInt($(this).children("td:nth-child(4)").text());
@@ -84,8 +86,6 @@ var Webwork = (function() {
             score += perc * worth;
             total += 100 * worth;
             problems++;
-            if(perc == 0)
-                blank++;
         });
 
         var average = parseInt(score / total * 100);
@@ -99,11 +99,18 @@ var Webwork = (function() {
             td.addClass("bw_okay");
         else
             td.addClass("bw_poor");
+    }
 
-        /*
-         * Work scheduler
-         */
+    function workScheduler() {
+        var blank = 0;
+        $("table.problem_set_table tr:nth-child(n+2)").each(function() {
+            var perc = parseInt($(this).children("td:nth-child(5)").text().replace("%", ""));
+            if(perc == 0)
+                blank++;
+        });
+
         // Count how many days we have until the due date
+        var date = getDueDate();
         var now = new Date();
         var diff = date.getTime() - now.getTime();
         var days = Math.round(diff / (1000 * 60 * 60 * 24));
@@ -112,15 +119,19 @@ var Webwork = (function() {
         $("#bw_due").append("<p>Complete <b>" + per_day + " problems</b> per day to finish on time.</p>");
     }
 
+    function augmentQuestionList() {
+        relativeDueDate();
+        workScheduler();
+        highlightScore();
+        totalScore();
+    }
+
     function loadBetterBox() {
         $("<div class=\"bw_box\"></div>").load(chrome.extension.getURL("box.html")).appendTo("body");
     }
 
     return {
-        set: set,
-        problem: problem,
-        parseQuestionList: parseQuestionList,
-        loadBetterBox: loadBetterBox
+        augmentQuestionList: augmentQuestionList
     }
 })();
 
@@ -137,7 +148,7 @@ $(document).ready(function() {
         Webwork.loadBetterBox();
     }
     else if(status.match(set_re)) {
-        Webwork.parseQuestionList();
+        Webwork.augmentQuestionList();
         var results = set_re.exec(status);
         Webwork.set = parseInt(results[1]);
     }
