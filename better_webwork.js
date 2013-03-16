@@ -1,4 +1,10 @@
-// Taken from http://stackoverflow.com/a/3000784/29291
+/*
+ * Better WeBWorK
+ * Making WeBWorK less shitty!
+ * ---------------
+ * (C) 2013 Steve Gattuso
+ * <steve@stevegattuso.me>
+ */
 var Util = (function() {
     function trim(str) {
         return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
