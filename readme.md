@@ -9,7 +9,8 @@ Better WeBWorK is still under heavy development, so this list is far from comple
  * Humanizes the due date (*This webwork is due in 3 days*)
  * Helps you schedule your work (*Complete 7 problems per day to finish on time*)
 
-I'll get some screenshots up when the extension is a bit more polished
+Here's an early screenshot of the set list (taken 2013-03-16):
+[![Screenshot](http://i.imgur.com/Q3hqCSAl.jpg)](http://i.imgur.com/Q3hqCSA.jpg)
 
 ## Installation
 Better Webwork will eventually be on the Chrome Web Store, but until then you'll have to install it by 
