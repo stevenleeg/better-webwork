@@ -15,11 +15,13 @@ Here's an early screenshot of the set list (taken 2013-03-16):
 ## Installation
 Better Webwork will eventually be on the Chrome Web Store, but until then you'll have to install it by 
 
-1. Checking out the repository:
-    
+ * Checking out the repository:
+
+```bash
     $ git checkout http://github.com/stevenleeg/better-webwork.git
-    
-2. Navigating to `chrome://extensions`
-3. Enabling **Developer mode**
-4. Clicking **Load unpacked extension...**
-5. Selecting Better Webwork's folder
+```
+
+ * Navigating to `chrome://extensions`
+ * Enabling **Developer mode**
+ * Clicking **Load unpacked extension...**
+ * Selecting Better Webwork's folder
