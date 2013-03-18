@@ -30,12 +30,24 @@
     background: #3BFF5F;
 }
 
+.bw_great_text {
+    color: #3BFF5F;
+}
+
 .bw_okay {
     background: yellow;
 }
 
+.bw_okay_text {
+    color: yellow;
+}
+
 .bw_poor {
     background: #FF0000;
+}
+
+.bw_poor_text {
+    color: #FF0000;
 }
 
 .bw_average td {

@@ -59,8 +59,15 @@ var Webwork = (function() {
         var date = getDueDate();
         var now = new Date();
         var is = (date < now) ? "was" : "is";
+        var diff = date.getTime() - now.getTime();
+        var days = Math.round(diff / (1000 * 60 * 60 * 24));
+        var color_class = "";
+        if(date < now)
+            color_class += "bw_poor_text";
+        else if(days == 0)
+            color_class += "bw_poor_text";
 
-        var date_display = $("<div id=\"bw_due\" class=\"bw_due\">This webwork " + is + " due <span id=\"bw_due_date\">" + moment(date).fromNow() + "</span>.</div>");
+        var date_display = $("<div id=\"bw_due\" class=\"bw_due\">This webwork " + is + " due <span id=\"bw_due_date\" class=\"" + color_class + "\">" + moment(date).fromNow() + "</span>.</div>");
         date_container.after(date_display).text("");
 
         $("#bw_due_date").on("mouseover", function() {
@@ -75,10 +82,6 @@ var Webwork = (function() {
         $("#bw_due_date").on("mouseout", function() {
             $(this).text(moment(date).fromNow());
         });
-
-        if(date < now) {
-            $("#bw_due_date").addClass("error");
-        }
     }
 
     function totalScore() {
