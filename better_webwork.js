@@ -120,7 +120,11 @@ var Webwork = (function() {
         var now = new Date();
         var diff = date.getTime() - now.getTime();
         var days = Math.round(diff / (1000 * 60 * 60 * 24));
-        var per_day = Math.ceil(blank / days);
+        var per_day = 0;
+        if(days == 0)
+            per_day = blank;
+        else
+            per_day = Math.ceil(blank / days);
 
         $("#bw_due").append("<p>Complete <b>" + per_day + " problems</b> per day to finish on time.</p>");
     }
