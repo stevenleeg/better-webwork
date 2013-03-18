@@ -6,19 +6,22 @@ Better WeBWorK is still under heavy development, so this list is far from comple
 
  * Provides an overall score on set list
  * Color codes question scores on set list
- * Humanizes the due date (*This webwork is due in 3 days*)
- * Helps you schedule your work (*Complete 7 problems per day to finish on time*)
+ * Humanizes the due date ( *This webwork is due in 3 days* )
+ * Helps you schedule your work ( *Complete 7 problems per day to finish on time* )
 
-I'll get some screenshots up when the extension is a bit more polished
+Here's an early screenshot of the set list (taken 2013-03-16):
+[![Screenshot](http://i.imgur.com/Q3hqCSAl.jpg)](http://i.imgur.com/Q3hqCSA.jpg)
 
 ## Installation
 Better Webwork will eventually be on the Chrome Web Store, but until then you'll have to install it by 
 
-1. Checking out the repository:
-    
+ * Checking out the repository:
+
+```bash
     $ git checkout http://github.com/stevenleeg/better-webwork.git
-    
-2. Navigating to `chrome://extensions`
-3. Enabling **Developer mode**
-4. Clicking **Load unpacked extension...**
-5. Selecting Better Webwork's folder
+```
+
+ * Navigating to `chrome://extensions`
+ * Enabling **Developer mode**
+ * Clicking **Load unpacked extension...**
+ * Selecting Better Webwork's folder
