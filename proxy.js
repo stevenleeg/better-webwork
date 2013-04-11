@@ -63,24 +63,25 @@ function Injector() {
 }
 util.inherits(Injector, stream.Transform);
 
-Injector.prototype.injection = contentScripts.map(function (content) {
+Injector.prototype.headInjection = contentScripts.map(function (content) {
     return content.css.map(function (file) {
         return '<link rel="stylesheet" type="text/css" href="/' +
-            extension + '/' + file + '">';
-    }).concat(content.js.map(function (file) {
-        return '<script type="text/javascript" src="/' +
+            extension + '/' + file + '"/>';
+    }).concat('</head>').join("\n");
+}).join('');
+
+Injector.prototype.bodyInjection = contentScripts.map(function (content) {
+    return content.js.map(function (file) {
+        return '<script src="/' +
             extension + '/' + file + '"></script>';
-    }), '</head>').join("\n");
-});
+    }).concat('</body>').join("\n");
+}).join('');
 
 Injector.prototype._transform = function (chunk, encoding, done) {
-    var chunkString, chunkBuffer;
-
-    chunkString = chunk.toString();
-    chunkString = chunkString.replace('</head>', this.injection);
-    chunkBuffer = new Buffer(chunkString);
-
-    this.push(chunkBuffer);
+    this.push(new Buffer(chunk.toString()
+        .replace('</head>', this.headInjection)
+        .replace('</body>', this.bodyInjection)
+    ));
     done();
 };
 
