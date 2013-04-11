@@ -1,7 +1,6 @@
 var http = require('http'),
     https = require('https'),
     stream = require('stream'),
-    mime = require('mime'),
     fs = require('fs'),
     util = require('util'),
 
@@ -16,7 +15,18 @@ var http = require('http'),
     bww = contentScripts[0],
     bww.css.concat(bww.js).forEach(function (file) {
         localFiles['/' + extension + '/' + file] = extensionDir + '/' + file;
-    });
+    }),
+
+    mimes = {
+        js: 'text/javascript',
+        css: 'text/css',
+        txt: 'text/plain'
+    };
+
+function mimeLookup(filename) {
+    var matches = filename.match(/\.(.*)$/);
+    return matches && mimes[matches[1]] || mimes.txt;
+}
 
 // http://cantina.co/2012/11/13/save-your-sanity-with-node-proxies-injectorations/
 function serveLocalFile(httpRequest, httpResponse, filename) {
@@ -35,7 +45,7 @@ function serveLocalFile(httpRequest, httpResponse, filename) {
             return;
         }
         httpResponse.setHeader('Content-Type', 
-            mime.lookup(httpRequest.url));
+            mimeLookup(httpRequest.url));
             readStream = fs.createReadStream(filename);
             readStream.pipe(httpResponse);
     };
