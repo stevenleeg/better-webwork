@@ -28,9 +28,14 @@ function mimeLookup(filename) {
     return matches && mimes[matches[1]] || mimes.txt;
 }
 
+function log(situation, url) {
+    var i = url.indexOf('?');
+    console.log(situation + ': ' + (i < 0 ? url : url.substr(0, i)));
+}
+
 // http://cantina.co/2012/11/13/save-your-sanity-with-node-proxies-injectorations/
 function serveLocalFile(httpRequest, httpResponse, filename) {
-    console.log("local: " + httpRequest.url);
+    log("local", httpRequest.url);
 
     var send404 = function () {
         httpResponse.setHeader('Content-Type', 'text/html');
@@ -99,11 +104,11 @@ function serveViaProxy(httpRequest, httpResponse) {
     });
 
     if (/\.html$|\/[^.]*$/.test(httpRequest.url)) {
-        console.log("transforming: " + httpRequest.url);
+        log("transforming", httpRequest.url);
         output = new Injector();
         output.pipe(httpResponse);
     } else {
-        console.log("serving: " + httpRequest.url);
+        log("serving", httpRequest.url);
         output = httpResponse;
     }
 
