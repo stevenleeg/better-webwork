@@ -25,3 +25,16 @@ Better Webwork will eventually be on the Chrome Web Store, but until then you'll
  * Enabling **Developer mode**
  * Clicking **Load unpacked extension...**
  * Selecting Better Webwork's folder
+
+## Installation as proxy
+Better WebworK can also be used as a proxy instead of as a Chrome extension.
+
+ * Install [Node.js](http://nodejs.org/)
+
+ * Start the proxy:
+
+```bash
+    $ node proxy.js
+```
+
+ * Connect to the [local server](http://localhost:8031/)
