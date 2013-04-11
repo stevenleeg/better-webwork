@@ -28,18 +28,19 @@ function mimeLookup(filename) {
     return matches && mimes[matches[1]] || mimes.txt;
 }
 
-function log(situation, url) {
+function trimQS(url) {
     var i = url.indexOf('?');
-    console.log(situation + ': ' + (i < 0 ? url : url.substr(0, i)));
+    return i < 0 ? url : url.substr(0, i);
 }
 
 // http://cantina.co/2012/11/13/save-your-sanity-with-node-proxies-injectorations/
 function serveLocalFile(httpRequest, httpResponse, filename) {
-    log("local", httpRequest.url);
+    var path = trimQS(httpRequest.url);
+    console.log("local: " + path);
 
     var send404 = function () {
         httpResponse.setHeader('Content-Type', 'text/html');
-        httpResponse.write("NOT FOUND: " + httpRequest.url);
+        httpResponse.write("NOT FOUND: " + path);
         httpResponse.end();
     };
 
@@ -50,7 +51,7 @@ function serveLocalFile(httpRequest, httpResponse, filename) {
             return;
         }
         httpResponse.setHeader('Content-Type', 
-            mimeLookup(httpRequest.url));
+            mimeLookup(path));
             readStream = fs.createReadStream(filename);
             readStream.pipe(httpResponse);
     };
@@ -105,11 +106,11 @@ function serveViaProxy(httpRequest, httpResponse) {
     });
 
     if (/\.html$|\/[^.]*$/.test(httpRequest.url)) {
-        log("transforming", httpRequest.url);
+        console.log("transforming: " + trimQS(httpRequest.url));
         output = new Injector();
         output.pipe(httpResponse);
     } else {
-        log("serving", httpRequest.url);
+        console.log("serving: " + trimQS(httpRequest.url));
         output = httpResponse;
     }
 
@@ -118,9 +119,9 @@ function serveViaProxy(httpRequest, httpResponse) {
 }
 
 function server(httpRequest, httpResponse) {
-    var filename = localFiles[httpRequest.url];
+    var filename = localFiles[trimQS(httpRequest.url)];
     if (filename) {
-        serveLocalFile(httpRequest, httpResponse, filename);
+        serveLocalFile(httpRequest, httpResponse, trimQS(filename));
     } else {
         serveViaProxy(httpRequest, httpResponse);
     }
