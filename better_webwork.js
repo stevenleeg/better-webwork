@@ -26,14 +26,17 @@ var Webwork = (function() {
         if(_due_date != undefined)
             return _due_date;
 
-        var date_container = $("#info-panel-right b");
+        var date_container = $("#info-panel-right");
         var date_re = /([0-9]{2})\/([0-9]{2})\/([0-9]{4}) at ([0-9]{2})\:([0-9]{2})(am|pm) ([A-Z]{3})/;
-        var date_container = $("#info-panel-right b").text();
-        var results = date_re.exec(date_container);
-        for(var i = 1; i <=5; i++) {
-            results[i] = parseInt(results[i]);
+        var results = date_re.exec(date_container.text());
+        if (results) {
+            results = results.map(Number);
+        } else {
+            // Unable to find a due date, so default to present
+            _due_date = new Date();
+            return _due_date;
         }
-        results[4] = (results[6] == "pm") ? results[4] + 12 : results[4];
+        if (results[6] == "pm") results[4] += 12;
         _due_date = new Date(results[3], results[1] - 1, results[2], results[4], results[5]);
         return _due_date;
     }
