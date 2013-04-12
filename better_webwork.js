@@ -2,7 +2,7 @@
  * Better WeBWorK
  * Making WeBWorK less shitty!
  * ---------------
- * (C) 2013 Steve Gattuso
+ * (C) 2013 Steve Gattuso and all contributors
  * <steve@stevegattuso.me>
  */
 var Util = (function() {
@@ -132,19 +132,80 @@ var Webwork = (function() {
         $("#bw_due").append("<p>Complete <b>" + per_day + " problems</b> per day to finish on time.</p>");
     }
 
+    /*
+     * Grabs data from the set list so we can show some of it
+     * on the question page as well
+     */
+    function storeQuestionData() {
+        // Get the set number
+        var cur_set = parseInt($("#content span:nth-child(1)").text().match(/\s*([0-9]*)(.*)/)[1]);
+        
+        var total = -1;
+        var blank = 0;
+        $("table.problem_set_table tr:nth-child(n+2)").each(function() {
+            var perc = parseInt($(this).children("td:nth-child(5)").text().replace("%", ""));
+            if(perc == 0)
+                blank++;
+            total++;
+        });
+        
+        // Count how many days we have until the due date
+        var date = getDueDate();
+        var now = new Date();
+        var diff = date.getTime() - now.getTime();
+        var days = Math.round(diff / (1000 * 60 * 60 * 24));
+        var per_day = 0;
+        if(days == 0)
+            per_day = blank;
+        else
+            per_day = Math.ceil(blank / days);
+
+        localStorage.setItem("s" + cur_set + ".total", total);
+        localStorage.setItem("s" + cur_set + ".blank", blank);
+        localStorage.setItem("s" + cur_set + ".due", getDueDate());
+        localStorage.setItem("s" + cur_set + ".last_update", new Date());
+        localStorage.setItem("s" + cur_set + ".per_day", per_day);
+    }
+
     function augmentQuestionList() {
         relativeDueDate();
         workScheduler();
         highlightScore();
         totalScore();
+        storeQuestionData();
     }
 
     function loadBetterBox() {
-        $("<div class=\"bw_box\"></div>").load(chrome.extension.getURL("box.html")).appendTo("body");
+        // Get the current set
+        var cur_set = parseInt($("#content span:nth-child(1)").text().match(/\s*([0-9]*)(.*)/)[1]);
+        var total = localStorage.getItem("s" + cur_set + ".total");
+        var blank = localStorage.getItem("s" + cur_set + ".total");
+        var due = localStorage.getItem("s" + cur_set + ".total");
+        var last = new Date(localStorage.getItem("s" + cur_set + ".last_update"));
+        var per_day = localStorage.getItem("s" + cur_set + ".per_day");
+
+        var now = new Date();
+        if(now.getDate() != last.getDate() && now.getMonth() != last.getMonth()) {
+            var diff = due.getTime() - now.getTime();
+            var days = Math.round(diff / (1000 * 60 * 60 * 24));
+            if(days == 0)
+                per_day = blank;
+            else
+                per_day = Math.ceil(blank / days);
+        }
+
+        $("<div class=\"bw_box\"></div>").appendTo("body").load(chrome.extension.getURL("box.html"), function() {
+            $("#remaining").text(per_day);
+        });
+    }
+
+    function augmentQuestionPage() {
+        loadBetterBox();
     }
 
     return {
-        augmentQuestionList: augmentQuestionList
+        augmentQuestionList: augmentQuestionList,
+        augmentQuestionPage: augmentQuestionPage
     }
 })();
 
@@ -158,7 +219,7 @@ $(document).ready(function() {
         var results = problem_re.exec(status);
         Webwork.problem = parseInt(results[2]);
         Webwork.set = parseInt(results[1]);
-        Webwork.loadBetterBox();
+        Webwork.augmentQuestionPage();
     }
     else if(status.match(set_re)) {
         Webwork.augmentQuestionList();

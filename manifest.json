@@ -13,5 +13,9 @@
         ],
         "matches": ["*://*/webwork/*", "*://*/webwork2/*"]
     }],
-    "web_accessible_resources": ["box.html"]
+    "web_accessible_resources": ["box.html"],
+
+    "permissions": [
+        "storage"
+    ]
 }
