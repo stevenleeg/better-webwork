@@ -19,12 +19,44 @@ var Webwork = (function() {
     var MONTHS = ["January", "Februrary", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var set = undefined;
     var problem = undefined;
+    var page = undefined;
     var _due_date;
+
+    /*
+     * Calculates the number of problems you'll need to do today
+     * in order to stay on schedule.
+     */
+    function calculateScheduler(blank) {
+        // Count how many days we have until the due date
+        var per_day = parseInt(localStorage.getItem("s" + set + ".per_day"));
+        var date = getDueDate();
+        var now = new Date();
+        var last = new Date(localStorage.getItem("s" + set + ".last_update"));
+
+        if(now.getMonth() != last.getMonth() || now.getDate() != last.getDate()) {
+            var due = new Date(localStorage.getItem("s" + set + ".due"));
+            var diff = due.getTime() - now.getTime();
+            var days = Math.round(diff / (1000 * 60 * 60 * 24));
+            var per_day = 0;
+            if(days == 0)
+                per_day = blank;
+            else
+                per_day = Math.ceil(blank / days);
+
+            localStorage.setItem("s" + set + ".last_update", new Date());
+            localStorage.setItem("s" + set + ".per_day", per_day);
+        }
+
+        return per_day;
+    }
 
     function getDueDate() {
         // Try to get the cached date
         if(_due_date != undefined)
             return _due_date;
+
+        if(page != "set")
+            return localStorage.getItem("s" + set + ".due");
 
         var date_container = $("#info-panel-right");
         var date_re = /([0-9]{2})\/([0-9]{2})\/([0-9]{4}) at ([0-9]{2})\:([0-9]{2})(am|pm) ([A-Z]{3})/;
@@ -38,6 +70,10 @@ var Webwork = (function() {
         }
         if (results[6] == "pm") results[4] += 12;
         _due_date = new Date(results[3], results[1] - 1, results[2], results[4], results[5]);
+
+        // Store it
+        localStorage.setItem("s" + set + ".due", _due_date);
+
         return _due_date;
     }
 
@@ -121,16 +157,7 @@ var Webwork = (function() {
                 blank++;
         });
 
-        // Count how many days we have until the due date
-        var date = getDueDate();
-        var now = new Date();
-        var diff = date.getTime() - now.getTime();
-        var days = Math.round(diff / (1000 * 60 * 60 * 24));
-        var per_day = 0;
-        if(days == 0)
-            per_day = blank;
-        else
-            per_day = Math.ceil(blank / days);
+        var per_day = calculateScheduler(blank);
 
         $("#bw_due").append("<p>Complete <b>" + per_day + " problems</b> per day to finish on time.</p>");
     }
@@ -140,37 +167,37 @@ var Webwork = (function() {
      * on the question page as well
      */
     function storeQuestionData() {
-        // Get the set number
-        var cur_set = parseInt($("#content span:nth-child(1)").text().match(/\s*([0-9]*)(.*)/)[1]);
-        
         var total = -1;
         var blank = 0;
+        var scores = {};
         $("table.problem_set_table tr:nth-child(n+2)").each(function() {
             var perc = parseInt($(this).children("td:nth-child(5)").text().replace("%", ""));
             if(perc == 0)
                 blank++;
+
+            // Get the current problem number
+            var problem = $(this).children("td:nth-child(1)").text().match(/Problem ([0-9]*)/);
+            if(problem != null)
+                scores[problem[1]] = perc;
             total++;
         });
         
         // Count how many days we have until the due date
         var date = getDueDate();
         var now = new Date();
-        var diff = date.getTime() - now.getTime();
-        var days = Math.round(diff / (1000 * 60 * 60 * 24));
-        var per_day = 0;
-        if(days == 0)
-            per_day = blank;
-        else
-            per_day = Math.ceil(blank / days);
+        var last = new Date(localStorage.getItem("s" + set + ".last_update"));
 
-        localStorage.setItem("s" + cur_set + ".total", total);
-        localStorage.setItem("s" + cur_set + ".blank", blank);
-        localStorage.setItem("s" + cur_set + ".due", getDueDate());
-        localStorage.setItem("s" + cur_set + ".last_update", new Date());
-        localStorage.setItem("s" + cur_set + ".per_day", per_day);
+        localStorage.setItem("s" + set + ".total", total);
+        localStorage.setItem("s" + set + ".blank", blank);
+        localStorage.setItem("s" + set + ".scores", JSON.stringify(scores));
+        localStorage.setItem("s" + set + ".due", getDueDate());
     }
 
     function augmentQuestionList() {
+        // Assign the set number 
+        set = parseInt($("#content span:nth-child(1)").text().match(/\s*([0-9]*)(.*)/)[1]);
+        page = "set";
+
         relativeDueDate();
         workScheduler();
         highlightScore();
@@ -179,23 +206,28 @@ var Webwork = (function() {
     }
 
     function loadBetterBox() {
-        // Get the current set
-        var cur_set = parseInt($("#content span:nth-child(1)").text().match(/\s*([0-9]*)(.*)/)[1]);
-        var total = localStorage.getItem("s" + cur_set + ".total");
-        var blank = localStorage.getItem("s" + cur_set + ".total");
-        var due = localStorage.getItem("s" + cur_set + ".total");
-        var last = new Date(localStorage.getItem("s" + cur_set + ".last_update"));
-        var per_day = localStorage.getItem("s" + cur_set + ".per_day");
+        var total = localStorage.getItem("s" + set + ".total");
+        var blank = parseInt(localStorage.getItem("s" + set + ".blank"));
+        var scores = JSON.parse(localStorage.getItem("s" + set + ".scores"));
 
-        var now = new Date();
-        if(now.getDate() != last.getDate() && now.getMonth() != last.getMonth()) {
-            var diff = due.getTime() - now.getTime();
-            var days = Math.round(diff / (1000 * 60 * 60 * 24));
-            if(days == 0)
-                per_day = blank;
-            else
-                per_day = Math.ceil(blank / days);
+        // Was a problem just completed?
+        var score_summary = $("div.scoreSummary").text();
+        var score_text = score_summary.match(/Your overall recorded score is ([0-9]{1,3})\%/);
+        var score = 0;
+        if(score_text != null)
+            score = parseInt(score_text[1]);
+        console.log("Your score: " + score);
+        if(score == 100 && scores[problem] != 100) {
+            blank--;
+            console.log("Let's DO ITTTT");
+            scores[problem] = score;
+
+            localStorage.setItem("s" + set + ".scores", JSON.stringify(scores));
+            localStorage.setItem("s" + set + ".blank", blank);
+            localStorage.setItem("s" + set + ".per_day", per_day);
         }
+        
+        var per_day = calculateScheduler(blank);
 
         $("<div class=\"bw_box\"></div>").appendTo("body").load(chrome.extension.getURL("box.html"), function() {
             $("#remaining").text(per_day);
@@ -203,6 +235,11 @@ var Webwork = (function() {
     }
 
     function augmentQuestionPage() {
+        // Assign set and problem data
+        set = parseInt($("#content span:nth-child(1)").text().match(/\s*([0-9]*)(.*)/)[1]);
+        problem = parseInt($("#content span:nth-child(1)").text().match(/Problem ([0-9]*)/)[1]);
+        page = "question";
+
         loadBetterBox();
     }
 
