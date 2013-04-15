@@ -23,18 +23,29 @@ var Webwork = (function() {
     var _due_date;
 
     /*
+     * Handles storing/getting localStorage data
+     */
+    function setDataGet(key) {
+        return localStorage.getItem("s" + set + "." + key);
+    }
+
+    function setDataSet(key, val) {
+        return localStorage.setItem("s" + set + "." + key, val);
+    }
+
+    /*
      * Calculates the number of problems you'll need to do today
      * in order to stay on schedule.
      */
     function calculateScheduler(blank) {
         // Count how many days we have until the due date
-        var per_day = parseInt(localStorage.getItem("s" + set + ".per_day"));
+        var per_day = parseInt(setDataGet("per_day"));
         var date = getDueDate();
         var now = new Date();
-        var last = new Date(localStorage.getItem("s" + set + ".last_update"));
+        var last = new Date(setDataGet("last_update"));
 
         if(now.getMonth() != last.getMonth() || now.getDate() != last.getDate()) {
-            var due = new Date(localStorage.getItem("s" + set + ".due"));
+            var due = new Date(setDataGet("due"));
             var diff = due.getTime() - now.getTime();
             var days = Math.round(diff / (1000 * 60 * 60 * 24));
             var per_day = 0;
@@ -43,8 +54,8 @@ var Webwork = (function() {
             else
                 per_day = Math.ceil(blank / days);
 
-            localStorage.setItem("s" + set + ".last_update", new Date());
-            localStorage.setItem("s" + set + ".per_day", per_day);
+            setDataSet("last_update", new Date());
+            setDataSet("per_day", per_day);
         }
 
         return per_day;
@@ -56,7 +67,7 @@ var Webwork = (function() {
             return _due_date;
 
         if(page != "set")
-            return localStorage.getItem("s" + set + ".due");
+            return setDataGet("due");
 
         var date_container = $("#info-panel-right");
         var date_re = /([0-9]{2})\/([0-9]{2})\/([0-9]{4}) at ([0-9]{2})\:([0-9]{2})(am|pm) ([A-Z]{3})/;
@@ -72,7 +83,7 @@ var Webwork = (function() {
         _due_date = new Date(results[3], results[1] - 1, results[2], results[4], results[5]);
 
         // Store it
-        localStorage.setItem("s" + set + ".due", _due_date);
+        setDataSet("due", _due_date);
 
         return _due_date;
     }
@@ -185,12 +196,12 @@ var Webwork = (function() {
         // Count how many days we have until the due date
         var date = getDueDate();
         var now = new Date();
-        var last = new Date(localStorage.getItem("s" + set + ".last_update"));
+        var last = new Date(setDataGet("last_update"));
 
-        localStorage.setItem("s" + set + ".total", total);
-        localStorage.setItem("s" + set + ".blank", blank);
-        localStorage.setItem("s" + set + ".scores", JSON.stringify(scores));
-        localStorage.setItem("s" + set + ".due", getDueDate());
+        setDataSet("total", total);
+        setDataSet("blank", blank);
+        setDataSet("scores", JSON.stringify(scores));
+        setDataSet("due", getDueDate());
     }
 
     function augmentQuestionList() {
@@ -206,9 +217,9 @@ var Webwork = (function() {
     }
 
     function loadBetterBox() {
-        var total = localStorage.getItem("s" + set + ".total");
-        var blank = parseInt(localStorage.getItem("s" + set + ".blank"));
-        var scores = JSON.parse(localStorage.getItem("s" + set + ".scores"));
+        var total = setDataGet("total");
+        var blank = parseInt(setDataGet("blank"));
+        var scores = JSON.parse(setDataGet("scores"));
 
         // Was a problem just completed?
         var score_summary = $("div.scoreSummary").text();
@@ -222,9 +233,9 @@ var Webwork = (function() {
             console.log("Let's DO ITTTT");
             scores[problem] = score;
 
-            localStorage.setItem("s" + set + ".scores", JSON.stringify(scores));
-            localStorage.setItem("s" + set + ".blank", blank);
-            localStorage.setItem("s" + set + ".per_day", per_day);
+            setDataSet("scores", JSON.stringify(scores));
+            setDataSet("blank", blank);
+            setDataSet("per_day", per_day);
         }
         
         var per_day = calculateScheduler(blank);
