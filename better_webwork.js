@@ -263,7 +263,7 @@ var Webwork = (function() {
 $(document).ready(function() {
     // We only need to run on a question page for now
     var problem_re = /([0-9]*)\: Problem ([0-9]*)/;
-    var set_re = /([0-9]*)/;
+    var set_re = /^([0-9]*)\s*Up$/;
     var status = Util.trim($("#content").children("span:first-child").text());
 
     if(status.match(problem_re)) { 
